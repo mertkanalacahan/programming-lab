@@ -51,6 +51,8 @@ def complete_sentence(prompt:str, *, max_tokens:int=40):
     """
     
     # TODO Use looping to continue the sentence max_tokens times
+    for _ in range(max_tokens):
+        prompt += generate_token(prompt)
     
     # Print the complete output
     print("\n\n" + "=" * 70 + "\n" +prompt + "\n" + ("=" * 70) + "\n\n")
