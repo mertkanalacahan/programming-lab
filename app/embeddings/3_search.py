@@ -6,15 +6,18 @@ implements executing a vector query against a set of
 example documents.
 """
 
-from typing import List,Optional
-from transformers import AutoTokenizer, AutoModel
-import torch
-import numpy as np
 from collections import defaultdict
-from pydantic import BaseModel
+from dataclasses import dataclass
+from typing import List, Optional
+
+import numpy as np
+import torch
+from transformers import AutoModel, AutoTokenizer
+
 
 # This holds one of the search results
-class SearchResult(BaseModel):
+@dataclass
+class SearchResult:
     text:Optional[str] = None
     embeddings:Optional[List[float]] = None
     similarity:float = 0
@@ -64,10 +67,16 @@ def execute_search(query:str, documents:List[str]) -> List[SearchResult]:
     results:List[SearchResult] = [SearchResult(text=d) for d in documents]
     
     # 2 - TODO Set up the model
+    tokenizer, model = setup_embedding_model()
     
     # 3 - TODO Calculate query and document embeddings
+    query_embedding = get_embedding(query, tokenizer, model)
+    for result in results:
+        result.embeddings = get_embedding(result.text, tokenizer, model)
     
     # 4 - TODO Calculate similarities between the query and each document
+    for result in results:
+        result.similarity = cosine_similarity(query_embedding, result.embeddings)
     
     # 5 - Sort search results by similarity and assign its rank
     results.sort(key=lambda r:r.similarity, reverse=True)
